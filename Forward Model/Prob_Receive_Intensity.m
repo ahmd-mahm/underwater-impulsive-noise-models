@@ -14,9 +14,15 @@ nbins=100;
 
 x_max=500;
 
-x=sqrt(sum(rand(2,ceil(N*4/pi)).^2))*x_max;
-x=x(x<=x_max);
-N=length(x);
+%*** via rejection sampling ***
+%x=sqrt(sum(rand(2,ceil(N*4/pi)).^2))*x_max;
+%x=x(x<=x_max);
+%N=length(x);
+
+%*** via the direct method
+x=sqrt(rand(1,N))*x_max;
+
+
 
 %I_t=10000*(rand(1,N).^2);
 I_t=10000+(2*rand(1,N)-1)*100000*0.1;
