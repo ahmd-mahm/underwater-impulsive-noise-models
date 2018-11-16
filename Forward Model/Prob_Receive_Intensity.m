@@ -4,7 +4,7 @@ clc; clear; close all;
 % assuming a Poisson distribution of points in time and space (sea floor).
 % Considers both spreaidng and absorption losses.
 
-d=10;
+d=5;
 h=20;
 c=1500;
 N=10^8;
@@ -24,14 +24,12 @@ x=sqrt(rand(1,N))*x_max;
 
 
 
-%I_t=10000*(rand(1,N).^2);
-I_t=10000+(2*rand(1,N)-1)*100000*0.1;
+I_t=10000;
+%I_t=I_t+(2*rand(1,N)-1)*100000*0.1; % adds randomness to transmit intensity
 
 %del_max=sqrt(x_max.^2+(d-h).^2)/c;
 %t=(rand(1,N))*del_max;
 %tim=t+r/c;
-
-
 
 tim=rand(1,length(x));
 
@@ -40,7 +38,7 @@ I_r=I_t.*(r.^(-2)); % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alph
                     % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 I_r = I_r.*10.^(-alpha*r/(1000*10));
-I_r=I_r+randn(1,N)*sqrt(4);
+%I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
 
 figure
 histogram(x,nbins,'normalization','pdf')
@@ -68,3 +66,8 @@ xlabel('observed intensity')
 ylabel('pdf')
 set(gca,'yscale','log')
 grid on
+
+hold on
+i=I_t/(x_max^2):(I_t/((h-d)^2)-I_t/(x_max^2))/1000:I_t/((h-d)^2); % theoretical PDF
+f=I_t./((i.^2)*x_max^2);
+plot(i,f,'-k','linewidth',2)
