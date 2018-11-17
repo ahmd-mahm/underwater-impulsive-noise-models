@@ -12,7 +12,7 @@ alpha=5; % absorption coefficient in dB/km
 
 nbins=100;
 
-x_max=500;
+x_max=5000;
 
 %*** via rejection sampling ***
 %x=sqrt(sum(rand(2,ceil(N*4/pi)).^2))*x_max;
@@ -37,7 +37,7 @@ r=sqrt(x.^2+(d-h).^2);
 I_r=I_t.*(r.^(-2)); % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km 
                     % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-I_r = I_r.*10.^(-alpha*r/(1000*10));
+%I_r = I_r.*10.^(-alpha*r/(1000*10));
 %I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
 
 figure
