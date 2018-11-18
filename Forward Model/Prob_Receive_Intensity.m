@@ -12,7 +12,7 @@ alpha=5; % absorption coefficient in dB/km
 
 nbins=100;
 
-x_max=5000;
+x_max=500;
 
 %*** via rejection sampling ***
 %x=sqrt(sum(rand(2,ceil(N*4/pi)).^2))*x_max;
@@ -24,8 +24,10 @@ x=sqrt(rand(1,N))*x_max;
 
 
 
-I_t=10000;
-%I_t=I_t+(2*rand(1,N)-1)*100000*0.1; % adds randomness to transmit intensity
+I_t_mean=100; % in dB
+I_t=I_t_mean+(2*randn(1,N)-1)*I_t_mean*0.1/3; % adds randomness to transmit intensity
+
+I_t=10.^(I_t/10);
 
 %del_max=sqrt(x_max.^2+(d-h).^2)/c;
 %t=(rand(1,N))*del_max;
@@ -34,8 +36,8 @@ I_t=10000;
 tim=rand(1,length(x));
 
 r=sqrt(x.^2+(d-h).^2);
-I_r=I_t.*(r.^(-2)); % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km 
-                    % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
+I_r=I_t.*(r.^(-2)); % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km
+% linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 %I_r = I_r.*10.^(-alpha*r/(1000*10));
 %I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
@@ -56,7 +58,12 @@ ylabel('observed intensity')
 grid on
 
 
-b_max=max(I_t).*((h-d).^(-2));
+%b_max=max(I_t).*((h-d).^(-2));
+if isscalar(I_t)
+    b_max=I_t*((h-d).^(-2));
+else
+    b_max=(10^(I_t_mean/10))*((h-d).^(-2))*10;
+end
 %b_max=0.2;
 b_min=0;
 figure
@@ -68,6 +75,7 @@ set(gca,'yscale','log')
 grid on
 
 hold on
-i=I_t/(x_max^2):(I_t/((h-d)^2)-I_t/(x_max^2))/1000:I_t/((h-d)^2); % theoretical PDF
-f=I_t./((i.^2)*x_max^2);
+%i=I_t/(x_max^2):(I_t/((h-d)^2)-I_t/(x_max^2))/1000:I_t/((h-d)^2); % theoretical PDF
+i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
+f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
 plot(i,f,'-k','linewidth',2)
