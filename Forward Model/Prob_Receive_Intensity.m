@@ -24,8 +24,9 @@ x=sqrt(rand(1,N))*x_max;
 
 
 
-I_t_mean=100; % in dB
-I_t=I_t_mean+(2*randn(1,N)-1)*I_t_mean*0.1/3; % adds randomness to transmit intensity
+I_t_mean=40; % in dB
+I_t_var=(I_t_mean*0.1/3)^2;
+I_t=I_t_mean+(randn(1,N))*sqrt(I_t_var); % adds randomness to transmit intensity
 
 I_t=10.^(I_t/10);
 
@@ -62,7 +63,7 @@ grid on
 if isscalar(I_t)
     b_max=I_t*((h-d).^(-2));
 else
-    b_max=(10^(I_t_mean/10))*((h-d).^(-2))*10;
+    b_max=(10^(I_t_mean/10))*((h-d).^(-2))*3;
 end
 %b_max=0.2;
 b_min=0;
@@ -79,3 +80,23 @@ hold on
 i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
 f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
 plot(i,f,'-k','linewidth',2)
+
+i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
+f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
+plot(i,f,'-k','linewidth',2)
+
+c1=x_max^2+(h-d)^2;
+c2=(h-d)^2;
+mu=I_t_mean/(10*log10(exp(1)));
+sigma=sqrt(I_t_var)/(10*log10(exp(1)));
+
+f_I=pdf('lognormal',i*c1,mu,sigma)*(c1^2/(x_max^2))+pdf('lognormal',i*c2,mu,sigma)*c2*(1-(c1/x_max^2))...
+    +exp(mu+(sigma^2)/2)*sqrt(2/pi)./(2*(i.^2)*sigma*(x_max^2)) .* ( exp(-((mu+sigma^2-log(c2*i)).^2)./(2*sigma^2))...
+    -exp(-((mu+sigma^2-log(c1*i)).^2)./(2*sigma^2)))...
+    +exp(mu+(sigma^2)/2)./(2*(i.^2)*(x_max^2)).*(erf((mu+sigma^2-log(i*c2))/(sqrt(2)*sigma))...
+    -erf((mu+sigma^2-log(i*c1))/(sqrt(2)*sigma)));
+plot(i,f_I,'-r','linewidth',2)
+
+
+%F_I=cdf('lognormal',i*c1,mu,sigma)*(c1/(x_max^2))+cdf('lognormal',i*c2,mu,sigma)*(1-(c1/x_max^2))...
+%    -exp(mu+(sigma^2)/2)./(2*i*(x_max^2)).*(erf((mu+sigma^2-log(i*c2))/(sqrt(2)*sigma)) - erf((mu+sigma^2-log(i*c1))/(sqrt(2)*sigma)));
