@@ -77,14 +77,17 @@ grid on
 
 hold on
 %i=I_t/(x_max^2):(I_t/((h-d)^2)-I_t/(x_max^2))/1000:I_t/((h-d)^2); % theoretical PDF
+%i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
+%f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
+%plot(i,f,'-k','linewidth',2)
+
+
+% Analytic: Received Intensity due to deterministic I_t
 i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
 f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
 plot(i,f,'-k','linewidth',2)
 
-i=I_t/(x_max^2):(b_max-I_t/(x_max^2))/1000:b_max;
-f=(10^(I_t_mean/10))./((i.^2)*x_max^2);
-plot(i,f,'-k','linewidth',2)
-
+% Analytic: Received Intensity due to Log-Normal I_t
 c1=x_max^2+(h-d)^2;
 c2=(h-d)^2;
 mu=I_t_mean/(10*log10(exp(1)));
