@@ -7,7 +7,7 @@ clc; clear; close all;
 d=5;
 h=20;
 c=1500;
-N=10^8;
+N=10^7;
 alpha=5; % absorption coefficient in dB/km
 
 nbins=100;
@@ -24,9 +24,10 @@ x=sqrt(rand(1,N))*x_max;
 
 
 
-I_t_mean=40; % in dB
+I_t_mean=100; % in dB
 I_t_var=(I_t_mean*0.1/3)^2;
-I_t=I_t_mean+(randn(1,N))*sqrt(I_t_var); % adds randomness to transmit intensity
+%I_t=I_t_mean+(randn(1,N))*sqrt(I_t_var); % adds randomness to transmit intensity
+I_t=I_t_mean; % deterministic I_t
 
 I_t=10.^(I_t/10);
 
@@ -37,10 +38,11 @@ I_t=10.^(I_t/10);
 tim=rand(1,length(x));
 
 r=sqrt(x.^2+(d-h).^2);
-I_r=I_t.*(r.^(-2)); % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km
+I_r=I_t.*(r.^(-2)); % adds spreading loss
+% in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-%I_r = I_r.*10.^(-alpha*r/(1000*10));
+%I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
 %I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
 
 figure
@@ -98,7 +100,7 @@ f_I=pdf('lognormal',i*c1,mu,sigma)*(c1^2/(x_max^2))+pdf('lognormal',i*c2,mu,sigm
     -exp(-((mu+sigma^2-log(c1*i)).^2)./(2*sigma^2)))...
     +exp(mu+(sigma^2)/2)./(2*(i.^2)*(x_max^2)).*(erf((mu+sigma^2-log(i*c2))/(sqrt(2)*sigma))...
     -erf((mu+sigma^2-log(i*c1))/(sqrt(2)*sigma)));
-plot(i,f_I,'-r','linewidth',2)
+%plot(i,f_I,'-r','linewidth',2)
 
 
 %F_I=cdf('lognormal',i*c1,mu,sigma)*(c1/(x_max^2))+cdf('lognormal',i*c2,mu,sigma)*(1-(c1/x_max^2))...
