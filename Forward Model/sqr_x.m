@@ -5,13 +5,13 @@ samples=10^7;
 
 ydB_min = -100;
 ydB_max = 80;
-%x_min = db2mag(ydB_min);    % 20log10() => y=x^2
-%x_max = db2mag(ydB_max);
+x_min = db2mag(ydB_min);    % 20log10() => y=x^2
+x_max = db2mag(ydB_max);
 xdB_min = ydB_min/2;    % 10log10()
 xdB_max = ydB_max/2;
 
 ydB = ydB_min:(ydB_max-ydB_min)/nbins:ydB_max;
-%x = x_min:(x_max-x_min)/nbins:x_max;
+x = x_min:(x_max-x_min)/nbins:x_max;
 xdB = xdB_min:(xdB_max-xdB_min)/nbins:xdB_max;
 
 pd=makedist('Stable','alpha',1.5,'beta',0,'gam',1,'delta',0);
@@ -55,6 +55,20 @@ G=gradient(log10(pdf_y_dB)*10,ydB);
 G(1:2)
 
 figure
+subplot(2,1,1)
+%histogram(x_rnd,x,'normalization','pdf');
+
+grid on
+hold on
+x=-20:120/200:100;
+x=10.^(x);
+pdf_x= 2*pdf(pd,x);
+plot(x,pdf_x,'linewidth',2)
+set(gca,'yscale','log')
+set(gca,'xscale','log')
+xlabel('x')
+
+subplot(2,1,2)
 histogram(x_rnd_dB,xdB,'normalization','pdf');
 set(gca,'yscale','log')
 grid on
