@@ -45,36 +45,57 @@ edge=quantile(abs(P_r),[10^3/N, 1-10^3/N]);
 edges=edge(1):(edge(2)-edge(1))/nbins:edge(2);
 
 figure
-h=histogram(abs(P_r),edges,'normalization','pdf');
+histogram(abs(P_r),edges,'normalization','pdf');
 xlabel('absolute pressure)')
 ylabel('pdf')
 % grid on
 hold on
-pd=fitdist(P_r(1:10^5).','Stable');
-bins=(edges(1:end-1)+edges(2:end))/2;
-f=pdf(pd,bins);
+%pd=fitdist(P_r(1:min(10^5,N)).','Stable');
+[a,c,~] = sstabfit(P_r);
+pd = makedist('Stable','alpha',a,'beta',0,'gam',c,'delta',0);
+bins = (edges(1:end-1)+edges(2:end))/2;
+f = pdf(pd,bins);
 plot(bins,2*f,'linewidth',2);
 
 set(gca,'yscale','log')
 
-% minimize ||f-f_hat|| w.r.t 'x'
+% % minimize ||f-f_hat|| w.r.t 'x'
+% x_temp=reshape(x_cart,N,2);
 
-rmse=@(x_loc)cost(x_loc,d,h,alpha,I_t,edges,f);
-[x_loc,fval] = fminunc(rmse,x_cart);
+% fval = cost(x_cart,d,h,alpha,I_t,edges,f);
+% disp(['fval = ',num2str(fval)]);
+% 
+% rmse=@(x_loc)cost(x_loc,d,h,alpha,I_t,edges,f);
+% [x_loc,fval] = fminunc(rmse,x_cart);
+% disp(['fval = ',num2str(fval)]);
+% 
+% x_temp=reshape(x_cart,N,2);
+% ppickingcircle(x_temp(1:min(10^4,N),:),x_max);
+% x_temp=reshape(x_loc,N,2);
+% ppickingcircle(x_loc(1:min(10^4,N),:),x_max)
 
-x_temp=reshape(x_cart,N,2);
-ppickingcircle(x_temp(1:10^4,:),x_max);
-x_temp=reshape(x_loc,N,2);
-ppickingcircle(x_loc(1:10^4),x_max)
 
+% function J = cost(X,d,h,alpha,I_t,edges,f)
+%     r = sqrt(sum(X.^2,2)+(d-h)^2);
+%     Ir_dB = 10*log10(I_t.') - 20*log10(r) - alpha*(r/1000);
+%     %I_r = I_t.*(r.^(-2)); % adds spreading loss
+%     %I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
+%     I_r=10.^(Ir_dB/10);
+%     p_r=sqrt(I_r); % pressure samples
+%     [p_pdf,~] = histcounts(p_r,edges,'normalization','pdf');
+%     J=log(sum((p_pdf-2*f).^2));
+% end
 
-function rmse = cost(x_loc,d,h,alpha,I_t,edges,f)
-    r = sqrt(sum(x_loc.^2,2)+(d-h).^2);
-    I_r = I_t.*(r.^(-2)); % adds spreading loss
-    I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
+function J = cost(x,d,h,alpha,I_t,edges,f)
+    N=length(x)/2;
+    r = sqrt(sum(reshape(x,N,2).^2,2)+(d-h)^2);
+    Ir_dB = 10*log10(I_t.') - 20*log10(r) - alpha*(r/1000);
+    %I_r = I_t.*(r.^(-2)); % adds spreading loss
+    %I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
+    I_r=10.^(Ir_dB/10);
     p_r=sqrt(I_r); % pressure samples
     [p_pdf,~] = histcounts(p_r,edges,'normalization','pdf');
-    rmse=sum(sqrt((p_pdf-2*f).^2));
+    J=log(sum((p_pdf-2*f).^2));
 end
 
 function ppickingcircle(X,rho)
