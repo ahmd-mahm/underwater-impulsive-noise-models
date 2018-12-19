@@ -8,7 +8,7 @@ d=5;
 h=20;
 c=1500;
 N=10^7;
-alpha=5; % absorption coefficient in dB/km
+alpha=10; % absorption coefficient in dB/km
 
 nbins=100;
 
@@ -26,8 +26,8 @@ x=sqrt(rand(1,N))*x_max;
 
 I_t_mean=100; % in dB
 I_t_var=(I_t_mean*0.1/3)^2;
-%I_t=I_t_mean+(randn(1,N))*sqrt(I_t_var); % adds randomness to transmit intensity
-I_t=I_t_mean; % deterministic I_t
+I_t=I_t_mean+(randn(1,N))*sqrt(I_t_var); % adds randomness to transmit intensity
+%I_t=I_t_mean; % deterministic I_t
 
 I_t=10.^(I_t/10);
 
@@ -42,8 +42,11 @@ I_r=I_t.*(r.^(-2)); % adds spreading loss
 % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-%I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
+I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
 %I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
+
+p=sqrt(I_r).*(2*randi(2,1,length(I_r))-3);
+pd = fitdist(p(1:min(length(p),10^5)).','Stable')
 
 figure
 histogram(x,nbins,'normalization','pdf')
