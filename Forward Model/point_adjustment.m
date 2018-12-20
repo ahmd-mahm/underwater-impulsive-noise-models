@@ -6,11 +6,11 @@ clc; clear; close all
 
 d=5;
 h=10;
-c=1500;
-N=10^7;
+%c=1500;
+N=10^4;
 alpha=10; % absorption coefficient in dB/km
 
-nbins=100;
+nbins=500;
 
 x_max=5000;
 
@@ -41,8 +41,9 @@ phase=2*randi(2,1,length(I_r))-3;
 P_r=sqrt(I_r).*phase; % pressure samples
 
 
-edge=quantile(abs(P_r),[10^3/N, 1-10^3/N]);
+edge=quantile(abs(P_r),[0, 1-10^3/N]);
 edges=edge(1):(edge(2)-edge(1))/nbins:edge(2);
+edges=0:600/nbins:600;
 
 figure
 histogram(abs(P_r),edges,'normalization','pdf');
@@ -56,19 +57,18 @@ pd = makedist('Stable','alpha',a,'beta',0,'gam',c,'delta',0);
 bins = (edges(1:end-1)+edges(2:end))/2;
 f = pdf(pd,bins);
 plot(bins,2*f,'linewidth',2);
-
 set(gca,'yscale','log')
 
-% % minimize ||f-f_hat|| w.r.t 'x'
-% x_temp=reshape(x_cart,N,2);
+
+
 
 % fval = cost(x_cart,d,h,alpha,I_t,edges,f);
 % disp(['fval = ',num2str(fval)]);
-% 
+%  
 % rmse=@(x_loc)cost(x_loc,d,h,alpha,I_t,edges,f);
 % [x_loc,fval] = fminunc(rmse,x_cart);
 % disp(['fval = ',num2str(fval)]);
-% 
+%  
 % x_temp=reshape(x_cart,N,2);
 % ppickingcircle(x_temp(1:min(10^4,N),:),x_max);
 % x_temp=reshape(x_loc,N,2);
