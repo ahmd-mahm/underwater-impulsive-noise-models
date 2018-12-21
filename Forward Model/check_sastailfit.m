@@ -14,7 +14,7 @@ histogram(abs(x),edges,'normalization','pdf');
 set(gca,'yscale','log')
 set(gca,'xscale','log')
 
-[alp,del]=sastailfit(x,L);
+[alp,del,qnt]=sastailfit(x,L);
 
 pdd = makedist('Stable','alpha',alp,'beta',0,'gam',del,'delta',0);
 hold on
@@ -23,5 +23,4 @@ bins=(edges(1:end-1)+edges(2:end))/2;
 est_pdf=pdf(pdd,bins);
 plot(bins,2*est_pdf,'linewidth',2)
 
-q=quantile(abs(x),L);
-plot(q,10^-3*ones(1,2),'xk','markersize',10)
+plot(qnt,2*pdf(pdd,qnt),'xk','markersize',12,'linewidth',2)

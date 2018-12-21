@@ -1,7 +1,7 @@
-function [alpha,delta]=sastailfit(x,L)
+function [alpha,delta,qnt]=sastailfit(x,L)
 % fits the tail of the empirical pdf computed from 'x', where L(1) and L(2)
-% highlight the percentile data to be considered in the tail. Note that
-% L(1)<L(2) and both lie within [0,1]
+% highlight the minimum and maximum percentile of the data to be considered
+% in the tail. Note that L(1)<L(2) and both lie within [0,1]
 
 x=abs(x);
 nbins=50;
@@ -28,11 +28,11 @@ c= coeff(2);
 
 %hold on
 %plot(bins,grad*bins+c)
-hold on
-plot(exp(bins),exp(grad*bins+c),'linewidth',2)
-
+%hold on
+%plot(exp(bins),exp(grad*bins+c),'linewidth',2)
 
 alpha=-grad-1;
 Ca=gamma(alpha)*sin(alpha*pi/2)/pi;
 delta=(exp(c)/(2*alpha*Ca)).^(1/alpha);
+qnt=exp(qnt);
 end

@@ -46,14 +46,13 @@ I_r = I_r.*10.^(-alpha*r/(1000*10)); % adds absorption
 %I_r=I_r+randn(1,N)*sqrt(4); % adds noise to the received intensity
 
 p=sqrt(I_r).*(2*randi(2,1,length(I_r))-3);
-pd = fitdist(p(1:min(length(p),10^5)).','Stable')
+pd = fitdist(p(1:min(length(p),10^5)).','Stable');
 
 figure
 histogram(x,nbins,'normalization','pdf')
 xlabel('x')
 ylabel('pdf')
 grid on
-
 
 figure
 %[tim_sort,ind]=sort(tim);

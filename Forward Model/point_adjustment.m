@@ -43,7 +43,7 @@ P_r=sqrt(I_r).*phase; % pressure samples
 
 edge=quantile(abs(P_r),[0, 1-10^3/N]);
 edges=edge(1):(edge(2)-edge(1))/nbins:edge(2);
-edges=0:600/nbins:600;
+%edges=0:600/nbins:600;
 
 figure
 histogram(abs(P_r),edges,'normalization','pdf');
