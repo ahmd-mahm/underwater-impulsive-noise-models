@@ -7,7 +7,7 @@ icdfsas=zeros(1,length(alpha));
 perc=0.99;
 
 for i=1:length(alpha)
-    pd=makedist('Stable','alpha',alpha(i),'beta',0,'gam',1,'delta',0);
+    pd=makedist('Stable','alpha',alpha(i),'beta',0,'gam',2,'delta',0);
     icdfsas(i)=icdf(pd,perc);
 end
 figure

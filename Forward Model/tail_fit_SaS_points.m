@@ -1,36 +1,17 @@
 clc; clear; close all
 
-% accept-reject approach for point picking on the unit circle, such that
-% the received pressure samples IID SaS samples.
+% tail fit to SaS and use numerical optimization to modify the poisson
+% points in the unit circle, such that the received pressure samples IID
+% SaS samples.
 
 d=5;        % sensor depth
 h=20;       % height of water column
+%c=1500;
 N=10^5;     % number of points
 alpha=10;   % absorption coefficient in dB/km
 x_max=5000;
 
-It_mean_dB=100; % in dB
-It_var_dB=(It_mean_dB*0.1/3)^2;
-It_dB=It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
-
-alp=1.5;
-perc=0.95;
-
-pd=makedist('Stable','alpha',alp,'beta',0,'gam',1,'delta',0);
-icdfsas=icdf(pd,perc);
-Pt_mean=10.^(It_mean_dB/20);
-Pr_mean = 10.^((It_dB - 20*log(h-d) - alpha*((h-d)/1000))/20);
-del=Pr_mean/icdfsas;
-pd=makedist('Stable','alpha',alp,'beta',0,'gam',del,'delta',0);
-
 nbins=100;
-
-
-%syms Ir_dB It_dB r alpha
-%eqn = Ir_dB == It_dB - 20*log(r) - alpha*(r/1000);
-%r= solve(eqn,r)
-r=(20000*wrightOmega(It_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
-x=sqrt(r.^2-(h-d)^2);
 
 
 %*** via the direct method
@@ -39,12 +20,14 @@ phi=2*pi*rand(1,N);
 [x1,x2]=pol2cart(phi.',x.');
 x_phase=x.*exp(1i*phi);
 
-
+It_mean_dB=100; % in dB
+It_var_dB=(It_mean_dB*0.1/3)^2;
+It_dB=It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
 r=sqrt(x.^2+(d-h).^2);
 % in dB : Ir_dB = It_dB - 20log(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-% It=10.^(It_dB/10);
+%It=10.^(It_dB/10);
 % Ir=It.*(r.^(-2)); % adds spreading loss
 % Ir = Ir.*10.^(-alpha*r/(1000*10)); % adds absorption
 
