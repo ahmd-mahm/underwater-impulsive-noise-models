@@ -15,21 +15,23 @@ edges=qnt(1):(qnt(2)-qnt(1))/nbins:qnt(2);
 bins=(edges(1:end-1)+edges(2:end))/2;
 edges=exp(edges);
 
-lg_epdf=log(histcounts(abs(x),edges,'normalization','pdf')).';
+lg_epdf=log(histcounts(x,edges,'normalization','pdf')).';
 
-% figure
-% plot(bins,lg_epdf)
+bins=bins(~isinf(lg_epdf));
+lg_epdf=lg_epdf(~isinf(lg_epdf));
 
-X=[bins.', ones(nbins,1)];
+X=[bins.', ones(length(bins),1)];
 coeff=(X.'*X)\(X.'*lg_epdf);
 
 grad= coeff(1);
 c= coeff(2);
 
-%hold on
-%plot(bins,grad*bins+c)
-%hold on
-%plot(exp(bins),exp(grad*bins+c),'linewidth',2)
+% figure
+% bar(bins,lg_epdf,'basevalue',min(lg_epdf)*(1-0.2*sign(min(lg_epdf))))
+% hold on
+% plot(bins,grad*bins+c)
+% plot(qnt,[-10,-10],'xk','linewidth',2)
+% pause
 
 alpha=-grad-1;
 Ca=gamma(alpha)*sin(alpha*pi/2)/pi;
