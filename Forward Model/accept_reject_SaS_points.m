@@ -1,7 +1,9 @@
 clc; clear; close all
 
 % accept-reject approach for point picking on the unit circle, such that
-% the received pressure samples IID SaS samples.
+% the received pressure samples IID SaS samples. The script constrains
+% tranmitted intensities to be log-normal and considers
+% spreading & absorption.
 
 d=5;        % sensor depth
 h=20;       % height of water column
