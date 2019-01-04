@@ -28,55 +28,38 @@ Ir_dB=20*log10(Pr_abs);
 Ir=10.^(Ir_dB/10);
 
 
-r=sqrt(x.^2+(h-d)^2);
+r_d=sqrt(x.^2+(h-d)^2);
 
 % in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-It_dB = Ir_dB + 20*log10(r)+alpha*(r/1000);
+It_dB = Ir_dB + 20*log10(r_d)+alpha*(r_d/1000);
 It=10.^(It_dB/10);
 
 ppickingcircle(x_cmp(1:min(10^4,N)),x_max)
 
 nbins = 100;
+L=[10^-4,1-10^-4];
+
 figure
-[h,bins]=loglogpdfquant(Pr_abs,nbins,[10^-6,1-10^-6]);
+[~,bins]=loglogpdfquant(Pr_abs,nbins,L);
 fig_hist=gcf;
 hold on
-
 pdf_act=pdf(pd,bins);
 plot(bins,2*pdf_act,'linewidth',2)
+xlabel('P_r (direct arrivals)')
 
-%histogram(Pr,nbins,'normalization','pdf');
-%figure
-%quant_It=quantile(It,[10^-4,1-10^-5]);
-%bins_It= quant_It(1):(quant_It(2)- quant_It(1))/nbins:quant_It(2);
-%histogram(It,bins_It);
-figure
-[h_It,bins_It]=loglogpdfquant(It,nbins,[10^-6,1-10^-6]);
-xlabel('I_t')
-ylabel('pdf')
+r_s=sqrt(x.^2+(h+d)^2);
+Ir_s_dB = It_dB - 20*log10(r_s) - alpha*(r_s/1000);
+Pr_s_abs=10.^(Ir_s_dB/20);
 
 figure
-logypdfquant(It,nbins,[10^-6,1-10^-6]);
-xlabel('I_t')
-ylabel('pdf')
+loglogpdfquant(Pr_s_abs,nbins,L);
+hold on
+plot(bins,2*pdf_act,'linewidth',2)
+xlabel('P_r (surface reflections)')
 
-figure
-dBpdfquant(It,nbins,[10^-6,1-10^-6]);
-xlabel('I_t (dB)')
-ylabel('pdf')
-
-figure
-dBpdfquant(Ir,nbins,[10^-6,1-10^-6]);
-xlabel('I_r (dB)')
-ylabel('pdf')
-
-figure
-loglogpdfquant(Ir,nbins,[10^-6,1-10^-6]);
-xlabel('I_r')
-ylabel('pdf')
-
+ppickingcircle(x_cmp(1:min(10^4,N)),x_max)
 
 function ppickingcircle(x_cmp,rho)
 
