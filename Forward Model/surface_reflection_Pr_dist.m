@@ -8,7 +8,7 @@ d=5;        % sensor depth
 h=20;       % height of water column
 N=10^6;     % number of points
 alpha=10;   % absorption coefficient in dB/km
-x_max=5000;
+x_max=50;
 
 % point-picking via the direct method
 x=sqrt(rand(1,N))*x_max;
@@ -47,7 +47,7 @@ fig_hist=gcf;
 hold on
 pdf_act=pdf(pd,bins);
 plot(bins,2*pdf_act,'linewidth',2)
-xlabel('P_r (direct arrivals)')
+xlabel('abs(P_r) (direct arrivals)')
 
 r_s=sqrt(x.^2+(h+d)^2);
 Ir_s_dB = It_dB - 20*log10(r_s) - alpha*(r_s/1000);
@@ -57,7 +57,7 @@ figure
 loglogpdfquant(Pr_s_abs,nbins,L);
 hold on
 plot(bins,2*pdf_act,'linewidth',2)
-xlabel('P_r (surface reflections)')
+xlabel('abs(P_r) (surface reflections)')
 
 ppickingcircle(x_cmp(1:min(10^4,N)),x_max)
 

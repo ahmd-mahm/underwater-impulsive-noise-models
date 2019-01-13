@@ -2,13 +2,16 @@ clc; clear; close all
 
 % Impact of spreading vs aborption
 
-r_max=20;
+r_max=5;
 r=1/1000:r_max/1000:r_max; % distance in km
 
 sprd= 10*log10((r*1000).^-2); % spherical spreading loss
 
-alpha= 10; % absorption coefficient in dB/km
-absp= 10*(-alpha*r/10); % absorption loss
+alpha= 30; % absorption coefficient in dB/km
+absp= -alpha*r; % absorption loss
+
+% in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km
+% linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 plot(r,sprd,'linewidth',2)
 hold on

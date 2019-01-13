@@ -46,6 +46,8 @@ hold on
 
 pdf_act=pdf(pd,bins);
 plot(bins,2*pdf_act,'linewidth',2)
+xlabel('abs(P_r)')
+ylabel('pdf')
 
 %histogram(Pr,nbins,'normalization','pdf');
 %figure

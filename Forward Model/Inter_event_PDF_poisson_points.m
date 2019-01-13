@@ -7,14 +7,14 @@ d=5;        % sensor depth
 h=20;       % height of water column
 N=10^6;     % number of points
 alpha=10;   % absorption coefficient in dB/km
-x_max=50;
+x_max=500;
 c=1500;
 
 SR_flag=1;
 
 nbins =100;
 
-rate= 15;   % snaps per second
+rate= 15;   % observed snaps per second
 T=N/rate;   % observational window of snaps
 
 disp(['T = ',num2str(T/60),' mins']);
@@ -40,7 +40,7 @@ Rx_II= diff(Rx_time)*1000;
 
 ppickingcircle(x_cmp(1:min(10^4,N)),x_max)
 
-L=[10^-2,1-0.3];
+L=[10^-2,1-10^-4];
 
 figure
 pdfquant(Rx_II,nbins,L);
