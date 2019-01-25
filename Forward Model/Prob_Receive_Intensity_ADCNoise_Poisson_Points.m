@@ -1,7 +1,18 @@
-clc; clear; close all;
+clc; clear; close all
 
-% Considers a deterministic 'it' and constrains the received pressure to be
-% IID SaS. The script outputs the distribution of range.
+% 90 dB noise / ADC res noise
+% set a lambda value
+% Get an impulse train for transmission times, resolve at 180 kHz 
+% Convolve with snap waveform.
+% Get DA and SR
+% Plot received intensity
+
+
+
+% Considers a Poisson-point process (uniform distribution of events) on the
+% seabed, assumes an average snap waveform, and a log-normal distribution
+% of transmitted intensity. The script outputs the distribution of
+% transmitted intensity.
 
 d=5;        % sensor depth
 h=20;       % height of water column
@@ -9,9 +20,20 @@ N=10^7;     % number of points
 alpha=10;   % absorption coefficient in dB/km
 x_max=200;
 
+lambda=20; % snaps per second
 
-%alp=1.5;    % alpha of the SaS dist.
-%del=5;
+% x=loadHifDAQ3('F:\HifDAQ 2014\HIDAQ_2014\Aug_15_2014_2',0,20,1);
+% x=x(:,1);
+% figure
+% plot(x)
+% [alp,del,~]=sstabfit(x);
+% y=sort(x);
+% z=diff(y);
+% g=z(z~=0);
+% ADC_noise=20*log10(min(g));
+
+ADC_noise_I= 84.7; % in dB
+
 alp=1.53;
 del=2.282e+05;
 pd=makedist('Stable','alpha',alp,'beta',0,'gam',del,'delta',0);
@@ -22,8 +44,7 @@ Pr=random(pd,1,N);
 Pr_abs=abs(Pr);
 Ir_dB=20*log10(Pr_abs);
 
-%Ir=10.^(Ir_dB/10);
-
+x_max=
 
 
 % in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km

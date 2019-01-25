@@ -1,0 +1,171 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 9.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      5391,        162]
+NotebookOptionsPosition[      4819,        137]
+NotebookOutlinePosition[      5161,        152]
+CellTagsIndexPosition[      5118,        149]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"Simplify", "[", 
+  RowBox[{"Solve", "[", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"Ir", "-", "It", "+", 
+      RowBox[{"20", 
+       RowBox[{"Log10", "[", "r", "]"}]}], "+", 
+      RowBox[{"a", 
+       RowBox[{"(", 
+        RowBox[{"r", "/", "1000"}], ")"}]}]}], "\[Equal]", "0"}], ",", "r"}], 
+   "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.756539512292687*^9, 3.756539564057873*^9}, {
+  3.7565402277370605`*^9, 3.7565402991291447`*^9}, {3.7565403315365314`*^9, 
+  3.756540349978011*^9}, {3.756540565338681*^9, 3.7565405696942115`*^9}, {
+  3.756540684011376*^9, 3.7565407152903657`*^9}, {3.756540786693453*^9, 
+  3.7565407924204645`*^9}, {3.756540827055632*^9, 3.756540903188383*^9}, {
+  3.756540954805517*^9, 3.756540975927936*^9}, {3.756541025815464*^9, 
+  3.7565410355028696`*^9}, {3.756541134819762*^9, 3.7565411642731123`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  StyleBox[
+   RowBox[{"Solve", "::", "ifun"}], "MessageName"], 
+  RowBox[{
+  ":", " "}], "\<\"Inverse functions are being used by \
+\[NoBreak]\\!\\(Solve\\)\[NoBreak], so some solutions may not be found; use \
+Reduce for complete solution information. \\!\\(\\*ButtonBox[\\\"\
+\[RightSkeleton]\\\", ButtonStyle->\\\"Link\\\", ButtonFrame->None, \
+ButtonData:>\\\"paclet:ref/message/Solve/ifun\\\", ButtonNote -> \
+\\\"Solve::ifun\\\"]\\)\"\>"}]], "Message", "MSG",
+ CellChangeTimes->{
+  3.756540793045684*^9, {3.7565408281400127`*^9, 3.7565408603463306`*^9}, {
+   3.7565408932689347`*^9, 3.7565409037165685`*^9}, {3.756540956119979*^9, 
+   3.7565409764971385`*^9}, {3.756541029443739*^9, 3.756541036733302*^9}, {
+   3.756541138789157*^9, 3.7565411655955772`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"r", "\[Rule]", 
+     FractionBox[
+      RowBox[{"20000", " ", 
+       RowBox[{"ProductLog", "[", 
+        RowBox[{"-", 
+         FractionBox[
+          RowBox[{
+           SuperscriptBox[
+            RowBox[{"(", 
+             RowBox[{
+              SuperscriptBox["10", 
+               RowBox[{
+                RowBox[{"-", "1000"}], " ", 
+                RowBox[{"(", 
+                 RowBox[{"Ir", "-", "It"}], ")"}]}]], " ", 
+              SuperscriptBox["a", "20000"]}], ")"}], 
+            RowBox[{"1", "/", "20000"}]], " ", 
+           RowBox[{"Log", "[", "10", "]"}]}], "20000"]}], "]"}]}], 
+      RowBox[{"a", " ", 
+       RowBox[{"Log", "[", "10", "]"}]}]]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"r", "\[Rule]", 
+     FractionBox[
+      RowBox[{"20000", " ", 
+       RowBox[{"ProductLog", "[", 
+        FractionBox[
+         RowBox[{
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             SuperscriptBox["10", 
+              RowBox[{
+               RowBox[{"-", "1000"}], " ", 
+               RowBox[{"(", 
+                RowBox[{"Ir", "-", "It"}], ")"}]}]], " ", 
+             SuperscriptBox["a", "20000"]}], ")"}], 
+           RowBox[{"1", "/", "20000"}]], " ", 
+          RowBox[{"Log", "[", "10", "]"}]}], "20000"], "]"}]}], 
+      RowBox[{"a", " ", 
+       RowBox[{"Log", "[", "10", "]"}]}]]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.756539582392316*^9, {3.7565402315083857`*^9, 3.756540300545641*^9}, {
+   3.7565403352308283`*^9, 3.7565403509303446`*^9}, 3.7565405705815215`*^9, {
+   3.756540678895578*^9, 3.7565407161886992`*^9}, {3.756540788398051*^9, 
+   3.7565407930476832`*^9}, {3.7565408281490173`*^9, 
+   3.7565408603503313`*^9}, {3.7565408932718973`*^9, 3.75654090371957*^9}, {
+   3.7565409561239796`*^9, 3.7565409765001383`*^9}, {3.756541029472751*^9, 
+   3.7565410367663126`*^9}, {3.756541138793157*^9, 3.756541165598577*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Log", "[", "2", "]"}]], "Input",
+ CellChangeTimes->{{3.75654031169956*^9, 3.7565403142524586`*^9}, {
+  3.756540366839936*^9, 3.7565404033837767`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Log", "[", "2", "]"}]], "Output",
+ CellChangeTimes->{
+  3.7565403148446655`*^9, {3.7565403629705777`*^9, 3.756540404017999*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"N", "[", 
+  RowBox[{"Log", "[", "2", "]"}], "]"}]], "Input",
+ NumberMarks->False],
+
+Cell[BoxData["0.6931471805599453`"], "Output",
+ CellChangeTimes->{3.7565404071641035`*^9}]
+}, Open  ]]
+},
+WindowSize->{707, 816},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"9.0 for Microsoft Windows (64-bit) (January 25, 2013)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 857, 18, 31, "Input"],
+Cell[1439, 42, 788, 15, 39, "Message"],
+Cell[2230, 59, 1972, 51, 180, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4239, 115, 174, 3, 31, "Input"],
+Cell[4416, 120, 152, 3, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4605, 128, 105, 3, 31, "Input"],
+Cell[4713, 133, 90, 1, 31, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

@@ -7,7 +7,7 @@ r=1/1000:r_max/1000:r_max; % distance in km
 
 sprd= 10*log10((r*1000).^-2); % spherical spreading loss
 
-alpha= 30; % absorption coefficient in dB/km
+alpha= 10; % absorption coefficient in dB/km
 absp= -alpha*r; % absorption loss
 
 % in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km

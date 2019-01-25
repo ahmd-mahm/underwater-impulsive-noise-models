@@ -27,6 +27,7 @@ dB_bins=(edges(1:end-1)+edges(2:end))/2;
 
 h=histogram(x,edges,'normalization','cdf');
 grid on
+ylabel('cdf')
 
 % figure
 % histogram(x,edges,'normalization','pdf')

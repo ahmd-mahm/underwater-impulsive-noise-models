@@ -16,8 +16,11 @@ phi=2*pi*rand(1,N);
 x_cmp=x.*exp(1i*phi);
 
 
-alp=1.5;    % alpha of the SaS dist.
-del=0.1;
+%alp=1.5;    % alpha of the SaS dist.
+%del=0.1;
+alp=1.53;
+del=2.282e+05;
+
 pd=makedist('Stable','alpha',alp,'beta',0,'gam',del,'delta',0);
 disp(['alpha = ',num2str(alp)]);
 disp(['delta = ',num2str(del)]);
