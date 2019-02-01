@@ -17,7 +17,7 @@ clc; clear; close all
 d=5;        % sensor depth in m
 h=20;       % height of water column in m
 c=1500;     % speed of sund in water in m/s
-samples=5*10^6;   % considered time samples
+samples=10^6;   % considered time samples
 fs=180000;  % samping frequency in Hz
 
 alpha=10;   % absorption coefficient in dB/km
@@ -43,7 +43,8 @@ disp(['T = ',num2str(T),' secs']);
 % g=z(z~=0);
 % ADC_noise=20*log10(min(g));
 
-ADC_noise_I= 84.7; % in dB % ADC Noise
+%ADC_noise_I= 84.7; % in dB % ADC Noise
+%var_noise=10.^(ADC_noise_I/10);
 
 %% *** Evaluating x_max, tau_max, tau_min, and N ***
 
@@ -65,6 +66,7 @@ Tx_interval=T-tau_min+tau_max; % transmission time window
 N=round(lambda*Tx_interval); 
 
 disp(['N = ',num2str(N),' snaps']);
+disp(['x_max = ',num2str(x_max),' meters']);
 
 %% *** PDF/CDF Transmission Loss (dB) ***
 % TL_dB=it_dB-Ir_dB;
@@ -112,24 +114,53 @@ ind_Rx=round(t_ind_Rx*fs);
 N=length(ind_Rx);
 r=r(1:N);
 
-%% *** Generating Transmit Intensities ***
+%% *** Generating Transmit, ADC Noise and Receive Intensities ***
 It_dB=It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
 %it_dB=190;
+Ir_dB_max=It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
+
+ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
 
 % in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000);
-Ir = 10.^(Ir_dB/10);
-Ir_ts=zeros(1,samples);
-Ir_ts(ind_Rx)=Ir;
+Pr = 10.^(Ir_dB/20);
+Pr_ts=zeros(1,samples);
+Pr_ts(ind_Rx)=Pr;
 
 figure
-stem((0:1/fs:T-1/fs),Ir_ts)
+stem((0:1/fs:T-1/fs),Pr_ts)
 grid on
+xlabel('time')
+ylabel('P_r')
 
 load('silhouette.mat');
-Ir_ts=conv(Ir_ts,silh);
+Pr_ts=conv(Pr_ts,silh/max(silh));
 figure
-stem(Ir_ts)
+plot((0:length(Pr_ts)-1)/fs,Pr_ts)
 grid on
+xlabel('time')
+ylabel('P_r (waveform)')
+
+Ir_ts_dB=20*log10(abs(Pr_ts));
+figure
+plot((0:length(Pr_ts)-1)/fs,Ir_ts_dB)
+grid on
+xlabel('time')
+ylabel('I_r (dB), waveform')
+
+Pr_ts_ADC=Pr_ts+(rand(1,length(Pr_ts))*2-1)*ADC_noise_lvl/2;
+figure
+plot((0:length(Pr_ts)-1)/fs,Pr_ts_ADC)
+grid on
+xlabel('time')
+ylabel('P_r + ADC noise (waveform)')
+
+%% *** Histograms and PDFs ***
+
+L=[10^-4,1-10^-4];
+nbins=100;
+figure
+loglogpdfquant(abs(Pr_ts(Pr_ts~=0)),nbins,L);
+xlabel('Pr_ts -- direct arrivals')
