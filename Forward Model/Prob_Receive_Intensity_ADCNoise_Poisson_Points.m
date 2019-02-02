@@ -19,7 +19,8 @@ samples=10^6;   % considered time samples
 fs=180000;      % samping frequency in Hz
 
 alpha=10;       % absorption coefficient in dB/km
-lambda=5*10^5;   % snaps per second
+rho=0.05;       % between 0.01 and 0.1 snaps/sec/m
+
 T=samples/fs;   % associated time window in seconds
 
 %N=round(1.1*lambda*T); % number of points (snaps)
@@ -27,7 +28,7 @@ T=samples/fs;   % associated time window in seconds
 disp(['d = ',num2str(d),' m']);
 disp(['h = ',num2str(h),' m']);
 disp(['T = ',num2str(T),' secs']);
-disp(['lambda = ',num2str(lambda),' snaps/sec']);
+disp(['rho = ',num2str(rho),' snaps/sec/m']);
 
 
 %% *** ADC Noise ***
@@ -62,8 +63,10 @@ tau_max=r_max/c;
 tau_min=(h-d)/c;
 
 Tx_interval=T-tau_min+tau_max; % transmission time window
+lambda=rho*pi*(x_max^2);
 N=round(lambda*Tx_interval); % number of points (snaps)
 
+disp(['lambda = ',num2str(lambda),' snaps/sec']);
 disp(['N = ',num2str(N),' snaps in [-tau_max,T-tau_min]']);
 disp(['x_max = ',num2str(x_max),' meters']);
 
@@ -105,6 +108,8 @@ Pr_ts=conv(Pr_ts,silh/max(silh));   % Time-series of received pressure samples
 Ir_ts_dB=20*log10(abs(Pr_ts));
 N_ts=length(Pr_ts);                 % length of Pr_ts
 Pr_ts_ADC=Pr_ts+(rand(1,length(Pr_ts))*2-1)*ADC_noise_lvl/2;    % adding of ADC noise
+
+%% *** Plots ***
 
 figure
 plot((0:N_ts-1)/fs,Pr_ts)
