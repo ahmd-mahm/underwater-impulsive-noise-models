@@ -13,7 +13,7 @@ clc; clear; close all
 
 %% *** Initial Settings ***
 
-d=5;            % sensor depth in m
+d=19.9;            % sensor depth in m
 h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
 samples=10^6;   % considered time samples
@@ -216,11 +216,11 @@ end
 %% *** Delay Scatter Plots ***
 
 figure
-plot(Pr_ts_ADC(1:min(end,20000)-1),Pr_ts_ADC(2:min(end,20000)),'.','markersize',1); 
+plot(Pr_ts_ADC(1:min(end,20000)-1),Pr_ts_ADC(2:min(end,20000)),'.','markersize',4); 
 grid on; 
 axis equal;
-xlabel('Pr_ts_ADC(i)');
-ylabel('Pr_ts_ADC(i+1)')
+xlabel('Pr-ts-ADC(i)');
+ylabel('Pr-ts-ADC(i+1)')
 
 %% *** Histograms and PDFs ***
 
@@ -265,7 +265,7 @@ end
 %% *** Snap-Waveform-Picking Function ***
 function y=snap_ts(x,silh_mtx)
 samples=length(x);
-N=length(x~=0);
+N=length(x(x~=0));
 
 ind=(0:samples-1);
 ind=ind(x~=0);
