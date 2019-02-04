@@ -157,8 +157,7 @@ Pr= 10.^(Ir_dB/20);
 
 Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
-load('silhouette.mat');              % Silhouette of an average snap (DA)
-Pr_ts= conv(Pr_ts,silh/max(silh));   % Time-series of received pressure samples
+load('silhouette.mat','silh','silh_mtx');              % Silhouette of an average snap (DA)
 
 if SR
     It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
@@ -167,24 +166,24 @@ if SR
     Pr_sr= 10.^(Ir_dB_sr/20);
     
     Pr_ts_sr= zeros(1,samples);
-    Pr_ts_sr(ind_Rx_sr+1)= -Pr_sr;                % negative pressure
-    Pr_ts_sr= conv(Pr_ts_sr,silh/max(silh));    % time-series of received pressure samples
-    Ir_ts_dB_sr= 20*log10(abs(Pr_ts_sr));
+    Pr_ts_sr(ind_Rx_sr+1)= -Pr_sr;               % negative pressure
     
-    Pr_ts_fin= Pr_ts+Pr_ts_sr;
+    %Pr_ts_fin=conv(Pr_ts+Pr_ts_sr,silh/max(silh)); % time-series of received pressure samples
+    Pr_ts_fin=snap_ts(Pr_ts+Pr_ts_sr,silh_mtx);
 else
-    Pr_ts_fin= Pr_ts;
+    %Pr_ts_fin= conv(Pr_ts,silh/max(silh));          % time-series of received pressure samples
+    Pr_ts_fin=snap_ts(Pr_ts,silh_mtx);
 end
-Ir_ts_dB_fin= 20*log10(abs(Pr_ts));
-K_ts= samples+length(silh)-1;                 % length(Pr_ts)= length(Pr_ts_sr)= samples+length(silh)-1;
+Pr_ts_fin=Pr_ts_fin(1:samples);
+Ir_ts_dB_fin= 20*log10(abs(Pr_ts_fin));
 
-Pr_ts_ADC=Pr_ts_fin+(rand(1,K_ts)*2-1)*ADC_noise_lvl/2;    % adding of ADC noise
+Pr_ts_ADC=Pr_ts_fin+(rand(1,samples)*2-1)*ADC_noise_lvl/2;    % adding of ADC noise
 
 
 %% *** Plots ***
 
 figure
-plot((0:K_ts-1)/fs,Pr_ts_fin)
+plot((0:samples-1)/fs,Pr_ts_fin)
 grid on
 xlabel('time')
 if SR
@@ -194,7 +193,7 @@ else
 end
 
 figure
-plot((0:K_ts-1)/fs,Ir_ts_dB_fin)
+plot((0:samples-1)/fs,Ir_ts_dB_fin)
 grid on
 xlabel('time')
 if SR
@@ -205,7 +204,7 @@ end
 
 
 figure
-plot((0:length(Pr_ts)-1)/fs,Pr_ts_ADC)
+plot((0:length(Pr_ts_fin)-1)/fs,Pr_ts_ADC)
 grid on
 xlabel('time')
 if SR
@@ -214,11 +213,18 @@ else
     ylabel('P_r + ADC noise (waveform)')
 end
 
+%% *** Delay Scatter Plots ***
 
+figure
+plot(Pr_ts_ADC(1:min(end,20000)-1),Pr_ts_ADC(2:min(end,20000)),'.','markersize',1); 
+grid on; 
+axis equal;
+xlabel('Pr_ts_ADC(i)');
+ylabel('Pr_ts_ADC(i+1)')
 
 %% *** Histograms and PDFs ***
 
-L=[10^-5,1-10^-5];
+L=[10^-5,1-10^-6];
 nbins=100;
 figure
 loglogpdfquant(abs(Pr_ts_ADC),nbins,L);
@@ -254,4 +260,32 @@ hold on
 plot(real(x_cmp),imag(x_cmp),'.','markersize',4)
 grid on
 axis equal
+end
+
+%% *** Snap-Waveform-Picking Function ***
+function y=snap_ts(x,silh_mtx)
+samples=length(x);
+N=length(x~=0);
+
+ind=(0:samples-1);
+ind=ind(x~=0);
+
+[~,c]=size(silh_mtx);
+
+s_ind=randi(c,1,N);
+
+for i=1:c
+    temp=zeros(1,samples);
+    ind_temp=ind(s_ind==i);
+    temp(ind_temp+1)=x(ind_temp+1);
+    
+    temp=conv(temp,silh_mtx(:,i));
+    temp=temp(1:samples);
+    if i==1
+        y=temp;
+    else
+        y=y+temp;
+    end
+end
+
 end
