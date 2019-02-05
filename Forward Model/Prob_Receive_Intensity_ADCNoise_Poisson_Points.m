@@ -13,7 +13,7 @@ clc; clear; close all
 
 %% *** Initial Settings ***
 
-d=19.9;            % sensor depth in m
+d=15;            % sensor depth in m
 h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
 samples=10^6;   % considered time samples
@@ -157,7 +157,8 @@ Pr= 10.^(Ir_dB/20);
 
 Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
-load('silhouette.mat','silh','silh_mtx');              % Silhouette of an average snap (DA)
+load('silhouette.mat','silh','silh_mtx');   % Silhouette of an average snap (DA)
+silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),200));      % select 200 random snaps to ease compuatation
 
 if SR
     It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
