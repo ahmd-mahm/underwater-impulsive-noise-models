@@ -18,6 +18,7 @@ h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
 samples=10^6;   % considered time samples
 fs=180000;      % samping frequency in Hz
+snap_waveforms=300; % should be <=510
 
 SR=true;       % with or without surface reflections
 %SR=false;
@@ -158,7 +159,7 @@ Pr= 10.^(Ir_dB/20);
 Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
 load('silhouette.mat','silh','silh_mtx');   % Silhouette of an average snap (DA)
-silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),200));      % select 200 random snaps to ease compuatation
+silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),snap_waveforms));      % select 'snap_waveforms' random snaps to ease compuatation
 
 if SR
     It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
@@ -228,12 +229,27 @@ ylabel('Pr-ts-ADC(i+1)')
 L=[10^-5,1-10^-6];
 nbins=100;
 figure
-loglogpdfquant(abs(Pr_ts_ADC),nbins,L);
+[~,bins]=loglogpdfquant(abs(Pr_ts_ADC),nbins,L);
 if SR
     xlabel('Pr + ADC noise (DA+SR)')
 else
     xlabel('Pr + ADC noise (DA)')
 end
+
+%% *** SaS Fit ***
+
+[a,scl,mu]=sstabfit(Pr_ts_ADC);
+disp('==================')
+disp('SaS Parameter Fit:')
+disp(['alpha = ',num2str(a)]);
+disp(['delta = ',num2str(scl)]);
+disp(['mu = ',num2str(mu)]);
+
+pd=makedist('Stable','alpha',a,'beta',0,'gam',scl,'delta',mu);
+f=pdf(pd,bins);
+hold on
+plot(bins,2*f,'linewidth',2)
+
 
 %% *** Point-Picking Function ***
 
