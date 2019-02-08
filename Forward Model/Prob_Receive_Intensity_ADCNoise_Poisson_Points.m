@@ -18,7 +18,7 @@ h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
 samples=10^6;   % considered time samples
 fs=180000;      % samping frequency in Hz
-snap_waveforms=300; % should be <=510
+snap_waveforms=500; % should be <=510
 
 SR=true;       % with or without surface reflections
 %SR=false;
@@ -97,27 +97,33 @@ disp(['x_max = ',num2str(x_max),' meters']);
 
 %% *** Point Picking ***
 
-x=sqrt(rand(1,N))*x_max;
+g=power(rand(1,N),1/8);% if the power is 0.5, this shows a Poisson generation of points.
+x=g*x_max;          % change this to a generic g(l)*x_max, where l is in [0,1] and 0<=g(l)<=1 is a monotonically incrasing function.
 phi=2*pi*rand(1,N);
 x_cmp=x.*exp(1i*phi);
 r=sqrt(x.^2+(h-d)^2);
 if SR
     r_sr=sqrt(x.^2+(h+d)^2);
 end
+figure;
+ax1=subplot(2,1,1);
+ax2=subplot(2,1,2);
+
+ppickingcircle(x_cmp(1:min([10000,N])),x_max,ax1)
 
 %% *** Evaluating Received Snaps' Time Indices ***
 
 t_ind_Tx=rand(1,N)*(Tx_interval)-tau_max;
 if SR
-    t_ind_Rx= r/c+t_ind_Tx; 
+    t_ind_Rx= r/c+t_ind_Tx;
     t_ind_Rx_sr= r_sr/c+t_ind_Tx;
     
     t_ind_logic= and(t_ind_Rx>=0,t_ind_Rx<T-1/(2*fs));      % We want a maximum length of 'samples', hence the -1/2*fs
     t_ind_sr_logic= and(t_ind_Rx_sr>=0,t_ind_Rx_sr<T-1/(2*fs));% We want a maximum length of 'samples', hence the -1/2*fs
     
-%     c1=t_ind_Rx(xor(t_ind_logic,t_ind_sr_logic)); c2=t_ind_Rx_sr(xor(t_ind_logic,t_ind_sr_logic));
-%     figure
-%     plot(c1); hold on; plot(c2)
+    %     c1=t_ind_Rx(xor(t_ind_logic,t_ind_sr_logic)); c2=t_ind_Rx_sr(xor(t_ind_logic,t_ind_sr_logic));
+    %     figure
+    %     plot(c1); hold on; plot(c2)
     
     t_ind_Rx= t_ind_Rx(t_ind_logic);
     t_ind_Rx_sr= t_ind_Rx_sr(t_ind_sr_logic);
@@ -206,7 +212,7 @@ end
 
 
 figure
-plot((0:length(Pr_ts_fin)-1)/fs,Pr_ts_ADC)
+plot((0:samples-1)/fs,Pr_ts_ADC)
 grid on
 xlabel('time')
 if SR
@@ -218,8 +224,8 @@ end
 %% *** Delay Scatter Plots ***
 
 figure
-plot(Pr_ts_ADC(1:min(end,20000)-1),Pr_ts_ADC(2:min(end,20000)),'.','markersize',4); 
-grid on; 
+plot(Pr_ts_ADC(1:min([samples,20000])-1),Pr_ts_ADC(2:min([samples,20000])),'.','markersize',4);
+grid on;
 axis equal;
 xlabel('Pr-ts-ADC(i)');
 ylabel('Pr-ts-ADC(i+1)')
@@ -251,32 +257,31 @@ hold on
 plot(bins,2*f,'linewidth',2)
 
 
-%% *** Point-Picking Function ***
+%% *** Point-Picking: DA-only and SR-only ***
 
-if SR    
-    %ppickingcircle(x_cmp(and(t_ind_logic,t_ind_sr_logic)),x_max,h)
-    ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
-else
-    %ppickingcircle(x_cmp(t_ind_logic),x_max,h)
-end
-
+ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
+    
 
 
 %% *** Point-Picking Function ***
-function ppickingcircle(x_cmp,rho,h)
-if nargin==2
-    figure
-else
-    figure(h)
-end
+function ppickingcircle(x_cmp,rho,ax)
+
 theta=0:2*pi/500:2*pi;
 [x,y]=pol2cart(theta,repmat(rho,1,length(theta)));
-plot(x,y,'-k','linewidth',2)
-hold on
-
-plot(real(x_cmp),imag(x_cmp),'.','markersize',4)
-grid on
-axis equal
+if nargin==2
+    figure
+    plot(x,y,'-k','linewidth',2)
+    hold on
+    plot(real(x_cmp),imag(x_cmp),'.','markersize',4)
+    grid on
+    axis equal
+else
+    plot(ax,x,y,'-k','linewidth',2)
+    hold(ax,'on')
+    plot(ax,real(x_cmp),imag(x_cmp),'.','markersize',4)
+    grid(ax,'on')
+    axis(ax,'equal')
+end
 end
 
 %% *** Snap-Waveform-Picking Function ***
