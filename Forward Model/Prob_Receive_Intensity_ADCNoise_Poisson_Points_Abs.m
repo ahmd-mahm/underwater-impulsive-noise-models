@@ -20,8 +20,11 @@ samples=10^6;   % considered time samples
 fs=180000;      % samping frequency in Hz
 snap_waveforms=500; % should be <=510
 
-SR=true;       % with or without surface reflections
-%SR=false;
+SR=true;        % with or without surface reflections
+ABSP=true;       % with or without frequency-selective absorption
+if ABSP==true
+    range_bins=10;
+end
 
 alpha=10;       % absorption coefficient in dB/km
 rho=0.05;       % between 0.01 and 0.1 snaps/sec/m
@@ -57,14 +60,8 @@ It_mean_dB=180; % in dB
 It_var_dB=(10/3)^2;
 
 TL_dB_max=It_mean_dB+3*sqrt(It_var_dB);
-if alpha~=0
-    %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
-    r_max=(20000*wrightOmega(TL_dB_max/20 - log(20000/alpha)))/alpha;
-else
-    r_max=10.^(TL_dB_max)/20;
-end
+r_max=10.^(TL_dB_max)/20;
 x_max=sqrt(r_max^2-(h-d)^2);
-
 
 tau_min=(h-d)/c;
 if SR
@@ -110,7 +107,7 @@ ax1=subplot(2,1,1);
 ax2=subplot(2,1,2);
 
 ppickingcircle(x_cmp(1:min([10000,N])),x_max,ax1)
-title(ax1,'Point-picking')
+title(ax1,'point-picking')
 
 %% *** Evaluating Received Snaps' Time Indices ***
 
@@ -157,10 +154,10 @@ end
 
 It_dB= It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
 %it_dB=190;
-Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
+Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d); % assumes that geometric spreading is the primary source of TL within 'h-d'-is-small regime
 ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
 
-Ir_dB= It_dB - 20*log10(r) - alpha*(r/1000);
+Ir_dB= It_dB - 20*log10(r); % - alpha*(r/1000); only spreading loss is accounted for right now
 Pr= 10.^(Ir_dB/20);
 
 Pr_ts= zeros(1,samples);
@@ -178,10 +175,10 @@ if SR
     Pr_ts_sr(ind_Rx_sr+1)= -Pr_sr;               % negative pressure
     
     %Pr_ts_fin=conv(Pr_ts+Pr_ts_sr,silh/max(silh)); % time-series of received pressure samples
-    Pr_ts_fin=snap_ts(Pr_ts+Pr_ts_sr,silh_mtx);
+    Pr_ts_fin=snap_ts(Pr_ts+Pr_ts_sr,silh_mtx,ABSP);
 else
     %Pr_ts_fin= conv(Pr_ts,silh/max(silh));          % time-series of received pressure samples
-    Pr_ts_fin=snap_ts(Pr_ts,silh_mtx);
+    Pr_ts_fin=snap_ts(Pr_ts,silh_mtx,ABSP);
 end
 Pr_ts_fin=Pr_ts_fin(1:samples);
 Ir_ts_dB_fin= 20*log10(abs(Pr_ts_fin));
@@ -261,7 +258,7 @@ plot(bins,2*f,'linewidth',2)
 %% *** Point-Picking: DA-only and SR-only ***
 
 ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
-title(ax2,'points with either a DA or SR')
+title(ax2,'points with either a DA or SR') 
 
 
 %% *** Point-Picking Function ***
@@ -286,7 +283,13 @@ end
 end
 
 %% *** Snap-Waveform-Picking Function ***
-function y=snap_ts(x,silh_mtx)
+function y=snap_ts(x,silh_mtx,absorption)
+if nargin<=2
+    absorption=true;
+else
+    absorption=false;
+end
+
 samples=length(x);
 N=length(x(x~=0));
 
