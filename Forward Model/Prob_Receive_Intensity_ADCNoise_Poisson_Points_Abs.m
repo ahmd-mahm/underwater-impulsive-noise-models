@@ -258,7 +258,7 @@ plot(bins,2*f,'linewidth',2)
 %% *** Point-Picking: DA-only and SR-only ***
 
 ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
-title(ax2,'points with either a DA or SR') 
+title(ax2,'points with either a DA or SR')
 
 
 %% *** Point-Picking Function ***
@@ -314,4 +314,14 @@ for i=1:c
     end
 end
 
+end
+
+%% *** Absorption Filters ***
+function H=absorption_filter_range(range_max,bins,order,fs,d)
+
+edges=0:range_max/bins:range_max;
+range_bins=(edges(1:end-1)+edges(2:end))/2;
+H=zeros(order+1,bins);
+for i=1:bins
+    H(:,i) = absorptionFilter(order,fs,rang_bins(i),d).';
 end
