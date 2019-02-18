@@ -78,7 +78,7 @@ if alpha~=0
     %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
     r=(20000*wrightOmega(TL_dB_rand/20 - log(20000/alpha)))/alpha;
 else
-    r=10.^(TL_dB_rand)/20;
+    r=10.^(TL_dB_rand/20);
 end
 r=r(r>h-d);
 points=length(r);

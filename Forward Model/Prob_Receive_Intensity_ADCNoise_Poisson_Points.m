@@ -16,14 +16,15 @@ clc; clear; close all
 d=15;            % sensor depth in m
 h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
-samples=10^6;   % considered time samples
+samples=10^5;   % considered time samples
 fs=180000;      % samping frequency in Hz
 snap_waveforms=500; % should be <=510
 
-SR=true;       % with or without surface reflections
-%SR=false;
+L=[10^-6,1-10^-6]; % lower and upper quantlies for histogram plots
 
-alpha=10;       % absorption coefficient in dB/km
+SR=true;       % with or without surface reflections
+
+alpha=10^-5;       % absorption coefficient in dB/km
 rho=0.05;       % between 0.01 and 0.1 snaps/sec/m
 
 T=samples/fs;   % associated time window in seconds
@@ -34,6 +35,7 @@ disp(['d = ',num2str(d),' m']);
 disp(['h = ',num2str(h),' m']);
 disp(['T = ',num2str(T),' secs']);
 disp(['rho = ',num2str(rho),' snaps/sec/m']);
+disp(['alpha = ',num2str(alpha),' dB/km']);
 
 
 %% *** ADC Noise ***
@@ -56,12 +58,18 @@ disp(['rho = ',num2str(rho),' snaps/sec/m']);
 It_mean_dB=180; % in dB
 It_var_dB=(10/3)^2;
 
-TL_dB_max=It_mean_dB+3*sqrt(It_var_dB);
+Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
+ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
+Ir_dB_min=20*log10(ADC_noise_lvl);
+
+TL_dB_max= It_mean_dB+3*sqrt(It_var_dB)-Ir_dB_min ;
+
+%TL_dB_max=It_mean_dB+3*sqrt(It_var_dB); % assumes that Ir_dB_min=0
 if alpha~=0
     %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
     r_max=(20000*wrightOmega(TL_dB_max/20 - log(20000/alpha)))/alpha;
 else
-    r_max=10.^(TL_dB_max)/20;
+    r_max=10.^(TL_dB_max/20);
 end
 x_max=sqrt(r_max^2-(h-d)^2);
 
@@ -156,9 +164,6 @@ end
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 It_dB= It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
-%it_dB=190;
-Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
-ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
 
 Ir_dB= It_dB - 20*log10(r) - alpha*(r/1000);
 Pr= 10.^(Ir_dB/20);
@@ -167,6 +172,7 @@ Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
 load('silhouette.mat','silh','silh_mtx');   % Silhouette of an average snap (DA)
 silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),snap_waveforms));      % select 'snap_waveforms' random snaps to ease compuatation
+
 
 if SR
     It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
@@ -233,7 +239,6 @@ ylabel('Pr-ts-ADC(i+1)')
 
 %% *** Histograms and PDFs ***
 
-L=[10^-5,1-10^-6];
 nbins=100;
 figure
 [~,bins]=loglogpdfquant(abs(Pr_ts_ADC),nbins,L);
@@ -260,9 +265,10 @@ plot(bins,2*f,'linewidth',2)
 
 %% *** Point-Picking: DA-only and SR-only ***
 
-ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
-title(ax2,'points with either a DA or SR')
-
+if SR
+    ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
+    title(ax2,'points with either a DA or SR')
+end
 
 %% *** Point-Picking Function ***
 function ppickingcircle(x_cmp,rho,ax)

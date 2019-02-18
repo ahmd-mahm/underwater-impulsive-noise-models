@@ -16,7 +16,7 @@ clc; clear; close all
 d=15;            % sensor depth in m
 h=20;           % height of water column in m
 c=1500;         % speed of sund in water in m/s
-samples=10^6;   % considered time samples
+samples=10^5;   % considered time samples
 fs=180000;      % samping frequency in Hz
 snap_waveforms=500; % should be <=510
 
@@ -37,6 +37,7 @@ disp(['d = ',num2str(d),' m']);
 disp(['h = ',num2str(h),' m']);
 disp(['T = ',num2str(T),' secs']);
 disp(['rho = ',num2str(rho),' snaps/sec/m']);
+disp(['alpha = ',num2str(alpha),' dB/km']);
 
 
 %% *** ADC Noise ***
@@ -59,8 +60,19 @@ disp(['rho = ',num2str(rho),' snaps/sec/m']);
 It_mean_dB=180; % in dB
 It_var_dB=(10/3)^2;
 
-TL_dB_max=It_mean_dB+3*sqrt(It_var_dB);
-r_max=10.^(TL_dB_max)/20;
+Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
+ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
+Ir_dB_min=20*log10(ADC_noise_lvl);
+
+TL_dB_max= It_mean_dB+3*sqrt(It_var_dB)-Ir_dB_min ;
+
+%TL_dB_max=It_mean_dB+3*sqrt(It_var_dB); % assumes that Ir_dB_min=0
+if alpha~=0
+    %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
+    r_max=(20000*wrightOmega(TL_dB_max/20 - log(20000/alpha)))/alpha;
+else
+    r_max=10.^(TL_dB_max/20);
+end
 x_max=sqrt(r_max^2-(h-d)^2);
 
 tau_min=(h-d)/c;
@@ -153,9 +165,6 @@ end
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
 It_dB= It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
-%it_dB=190;
-Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d); % assumes that geometric spreading is the primary source of TL within 'h-d'-is-small regime
-ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
 
 Ir_dB= It_dB - 20*log10(r); % - alpha*(r/1000); only spreading loss is accounted for right now
 Pr= 10.^(Ir_dB/20);
@@ -175,10 +184,10 @@ if SR
     Pr_ts_sr(ind_Rx_sr+1)= -Pr_sr;               % negative pressure
     
     %Pr_ts_fin=conv(Pr_ts+Pr_ts_sr,silh/max(silh)); % time-series of received pressure samples
-    Pr_ts_fin=snap_ts(Pr_ts+Pr_ts_sr,silh_mtx,ABSP);
+    Pr_ts_fin=snap_ts(Pr_ts+Pr_ts_sr,silh_mtx);
 else
     %Pr_ts_fin= conv(Pr_ts,silh/max(silh));          % time-series of received pressure samples
-    Pr_ts_fin=snap_ts(Pr_ts,silh_mtx,ABSP);
+    Pr_ts_fin=snap_ts(Pr_ts,silh_mtx);
 end
 Pr_ts_fin=Pr_ts_fin(1:samples);
 Ir_ts_dB_fin= 20*log10(abs(Pr_ts_fin));
@@ -257,8 +266,10 @@ plot(bins,2*f,'linewidth',2)
 
 %% *** Point-Picking: DA-only and SR-only ***
 
-ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
-title(ax2,'points with either a DA or SR')
+if SR
+    ppickingcircle(x_cmp(xor(t_ind_logic,t_ind_sr_logic)),x_max,ax2) % Plots those points, that either have a DA or a SR but not both in the received time window [0,T)
+    title(ax2,'points with either a DA or SR')
+end
 
 
 %% *** Point-Picking Function ***
@@ -283,12 +294,7 @@ end
 end
 
 %% *** Snap-Waveform-Picking Function ***
-function y=snap_ts(x,silh_mtx,absorption)
-if nargin<=2
-    absorption=true;
-else
-    absorption=false;
-end
+function y=snap_ts(x,silh_mtx)
 
 samples=length(x);
 N=length(x(x~=0));
@@ -314,14 +320,4 @@ for i=1:c
     end
 end
 
-end
-
-%% *** Absorption Filters ***
-function H=absorption_filter_range(range_max,bins,order,fs,d)
-
-edges=0:range_max/bins:range_max;
-range_bins=(edges(1:end-1)+edges(2:end))/2;
-H=zeros(order+1,bins);
-for i=1:bins
-    H(:,i) = absorptionFilter(order,fs,rang_bins(i),d).';
 end
