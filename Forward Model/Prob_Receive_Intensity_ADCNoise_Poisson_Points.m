@@ -1,10 +1,4 @@
 clc; clear; close all
-% 90 dB noise / ADC res noise
-% set a lambda value
-% Get an impulse train for transmission times, resolve at fs
-% Convolve with snap waveform.
-% Get DA and SR
-% Plot received intensity
 
 % Considers a Poisson-point process (uniform distribution of events) on the
 % seabed, assumes an average snap waveform, and a log-normal distribution
@@ -19,39 +13,23 @@ c=1500;         % speed of sund in water in m/s
 samples=10^5;   % considered time samples
 fs=180000;      % samping frequency in Hz
 snap_waveforms=500; % should be <=510
+ADC_res= 16; %  in bits
+
+ext_noise=true;
+if ext_noise
+    ext_noise_lvl=90; % measured in dB re 1 uPa
+end
 
 L=[10^-6,1-10^-6]; % lower and upper quantlies for histogram plots
 
 SR=true;       % with or without surface reflections
 
-alpha=10^-5;       % absorption coefficient in dB/km
+alpha=10;       % absorption coefficient in dB/km
 rho=0.05;       % between 0.01 and 0.1 snaps/sec/m
 
 T=samples/fs;   % associated time window in seconds
 
 %N=round(1.1*lambda*T); % number of points (snaps)
-
-disp(['d = ',num2str(d),' m']);
-disp(['h = ',num2str(h),' m']);
-disp(['T = ',num2str(T),' secs']);
-disp(['rho = ',num2str(rho),' snaps/sec/m']);
-disp(['alpha = ',num2str(alpha),' dB/km']);
-
-
-%% *** ADC Noise ***
-
-% x=loadHifDAQ3('F:\HifDAQ 2014\HIDAQ_2014\Aug_15_2014_2',0,20,1);
-% x=x(:,1);
-% figure
-% plot(x)
-% [alp,del,~]=sstabfit(x);
-% y=sort(x);
-% z=diff(y);
-% g=z(z~=0);
-% ADC_noise=20*log10(min(g));
-
-%ADC_noise_I= 84.7; % in dB % ADC Noise
-%var_noise=10.^(ADC_noise_I/10);
 
 %% *** Evaluating x_max, tau_max, tau_min, lambda and N ***
 
@@ -59,15 +37,26 @@ It_mean_dB=180; % in dB
 It_var_dB=(10/3)^2;
 
 Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
-ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
-Ir_dB_min=20*log10(ADC_noise_lvl);
+ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^ADC_res); % ADC Noise with 16 bits
+
+if ext_noise
+    Ir_dB_min=ext_noise_lvl;
+else
+    Ir_dB_min=20*log10(ADC_noise_lvl);
+end
 
 TL_dB_max= It_mean_dB+3*sqrt(It_var_dB)-Ir_dB_min ;
 
 %TL_dB_max=It_mean_dB+3*sqrt(It_var_dB); % assumes that Ir_dB_min=0
+
+%syms Ir_dB It_dB r alpha
+%eqn = Ir_dB == It_dB - 20*c*log(r) - alpha*(r/1000);
+%r= solve(eqn,r)
+%where c= 1/log(10)
+%r = (1000*c*wrightOmega(- log((1000*c)/alpha) - (1000*Ir_dB - 1000*It_dB)/(1000*c)))/alpha
 if alpha~=0
-    %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
-    r_max=(20000*wrightOmega(TL_dB_max/20 - log(20000/alpha)))/alpha;
+    r_max= (1000*20/log(10)*wrightOmega(TL_dB_max/(20/log(10)) ...
+        - log((1000*20/log(10))/alpha) ))/alpha; % see "Spreading_Absorption_WrightOmegaFunction.m" for clarity
 else
     r_max=10.^(TL_dB_max/20);
 end
@@ -96,11 +85,45 @@ lambda=rho*pi*(x_max^2);
 
 N=round(lambda*Tx_interval); % number of points (snaps)
 
-disp(['tau_min = ',num2str(tau_min),' secs']);
-disp(['tau_max = ',num2str(tau_max),' secs']);
-disp(['lambda = ',num2str(lambda),' snaps/sec']);
+%% *** Display Parameters
+
+bool={'false','true'};
+
+disp('Inputs (Boolean) -->')
+disp('--------------------')
+disp(['input noise level enabled (ext_noise) = ',bool{ext_noise+1}]);
+disp(['surface reflections (SR) = ',bool{SR+1}]);
+disp(' ')
+
+disp('Inputs -->')
+disp('----------')
+disp(['depth (d) = ',num2str(d),' m']);
+disp(['height (h)= ',num2str(h),' m']);
+disp(['sound speed (c)= ',num2str(c),' m']);
+disp(['time samples (samples) = ',num2str(samples)]);
+disp(['snap density (rho) = ',num2str(rho),' snaps/sec/m']);
+disp(['attenuation coefficient (alpha) = ',num2str(alpha),' dB/km']);
+disp(['avg. Tx level = ',num2str(It_mean_dB),' dB re 1uPa @ 1m']);
+if ext_noise
+    disp(['noise level - External Noise = ',num2str(Ir_dB_min),' dB re 1uPa']);
+else
+    disp(['ADC Resolution (ADC_res) = ',num2str(ADC_res),' bits']);
+end
+disp(' ')
+
+disp('Derived quantities -->')
+disp('----------------------')
+disp(['time window (T) = ',num2str(T),' secs']);
+disp(['minimum propagation delay (tau_min) = ',num2str(tau_min),' secs']);
+disp(['maximum propagation delay (tau_max) = ',num2str(tau_max),' secs']);
+disp(['snap rate (lambda) = ',num2str(lambda),' snaps/sec']);
 disp(['N = ',num2str(N),' snaps in [-tau_max,T-tau_min]']);
-disp(['x_max = ',num2str(x_max),' meters']);
+disp(['maximum horizontal distance considered (x_max) = ',num2str(x_max),' meters']);
+if ~ext_noise
+    disp(['noise level (ADC_res) = ',num2str(ADC_Rs),' dB re 1uPa']);
+end
+
+
 
 
 %% *** Point Picking ***
@@ -192,8 +215,11 @@ end
 Pr_ts_fin=Pr_ts_fin(1:samples);
 Ir_ts_dB_fin= 20*log10(abs(Pr_ts_fin));
 
-Pr_ts_ADC=Pr_ts_fin+(rand(1,samples)*2-1)*ADC_noise_lvl/2;    % adding of ADC noise
-
+if ext_noise
+    Pr_ts_ADC=Pr_ts_fin+randn(1,samples)*(10.^(ext_noise_lvl/20))/3; % adding Gaussian external noise
+else
+    Pr_ts_ADC=Pr_ts_fin+(rand(1,samples)*2-1)*ADC_noise_lvl/2;    % adding of ADC noise
+end
 
 %% *** Plots ***
 
@@ -252,6 +278,7 @@ end
 
 [a,scl,mu]=sstabfit(Pr_ts_ADC);
 disp('==================')
+disp(' ')
 disp('SaS Parameter Fit:')
 disp(['alpha = ',num2str(a)]);
 disp(['delta = ',num2str(scl)]);

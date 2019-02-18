@@ -19,6 +19,7 @@ c=1500;         % speed of sund in water in m/s
 samples=10^5;   % considered time samples
 fs=180000;      % samping frequency in Hz
 snap_waveforms=500; % should be <=510
+ADC_res= 16; %  in bits
 
 SR=true;        % with or without surface reflections
 ABSP=true;       % with or without frequency-selective absorption
@@ -40,36 +41,27 @@ disp(['rho = ',num2str(rho),' snaps/sec/m']);
 disp(['alpha = ',num2str(alpha),' dB/km']);
 
 
-%% *** ADC Noise ***
-
-% x=loadHifDAQ3('F:\HifDAQ 2014\HIDAQ_2014\Aug_15_2014_2',0,20,1);
-% x=x(:,1);
-% figure
-% plot(x)
-% [alp,del,~]=sstabfit(x);
-% y=sort(x);
-% z=diff(y);
-% g=z(z~=0);
-% ADC_noise=20*log10(min(g));
-
-%ADC_noise_I= 84.7; % in dB % ADC Noise
-%var_noise=10.^(ADC_noise_I/10);
-
 %% *** Evaluating x_max, tau_max, tau_min, lambda and N ***
 
 It_mean_dB=180; % in dB
 It_var_dB=(10/3)^2;
 
 Ir_dB_max= It_mean_dB+3*sqrt(It_var_dB) - 20*log10(h-d) - alpha*((h-d)/1000);
-ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^16); % ADC Noise with 16 bits
+ADC_noise_lvl= (10^(Ir_dB_max/20))/(2^ADC_res); % ADC Noise with 16 bits
 Ir_dB_min=20*log10(ADC_noise_lvl);
 
 TL_dB_max= It_mean_dB+3*sqrt(It_var_dB)-Ir_dB_min ;
 
 %TL_dB_max=It_mean_dB+3*sqrt(It_var_dB); % assumes that Ir_dB_min=0
+
+%syms Ir_dB It_dB r alpha
+%eqn = Ir_dB == It_dB - 20*c*log(r) - alpha*(r/1000);
+%r= solve(eqn,r)
+%where c= 1/log(10)
+%r = (1000*c*wrightOmega(- log((1000*c)/alpha) - (1000*Ir_dB - 1000*It_dB)/(1000*c)))/alpha
 if alpha~=0
-    %r=(20000*wrightOmega(it_dB/20 - Ir_dB/20 - log(20000/alpha)))/alpha;
-    r_max=(20000*wrightOmega(TL_dB_max/20 - log(20000/alpha)))/alpha;
+    r_max= (1000*20/log(10)*wrightOmega(TL_dB_max/(20/log(10)) ...
+        - log((1000*20/log(10))/alpha) ))/alpha; % see "Spreading_Absorption_WrightOmegaFunction.m" for clarity
 else
     r_max=10.^(TL_dB_max/20);
 end
@@ -102,6 +94,11 @@ disp(['tau_max = ',num2str(tau_max),' secs']);
 disp(['lambda = ',num2str(lambda),' snaps/sec']);
 disp(['N = ',num2str(N),' snaps in [-tau_max,T-tau_min]']);
 disp(['x_max = ',num2str(x_max),' meters']);
+
+disp(['Avg. Tx level = ',num2str(It_mean_dB),' dB re 1uPa @ 1m']);
+disp(['Noise level = ',num2str(Ir_dB_min),' dB re 1uPa']);
+
+disp(['alpha = ',num2str(alpha),' dB/km']);
 
 
 %% *** Point Picking ***
