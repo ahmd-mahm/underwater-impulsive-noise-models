@@ -100,7 +100,7 @@ disp('----------')
 disp(['depth (d) = ',num2str(d),' m']);
 disp(['height (h)= ',num2str(h),' m']);
 disp(['sound speed (c)= ',num2str(c),' m']);
-disp(['time samples (samples) = ',num2str(samples)]);
+disp(['samples (samples) = ',num2str(samples)]);
 disp(['snap density (rho) = ',num2str(rho),' snaps/sec/m']);
 disp(['attenuation coefficient (alpha) = ',num2str(alpha),' dB/km']);
 disp(['avg. Tx level = ',num2str(It_mean_dB),' dB re 1uPa @ 1m']);
@@ -122,6 +122,7 @@ disp(['maximum horizontal distance considered (x_max) = ',num2str(x_max),' meter
 if ~ext_noise
     disp(['noise level (ADC_res) = ',num2str(ADC_Rs),' dB re 1uPa']);
 end
+
 
 
 
@@ -179,7 +180,7 @@ else
     N=length(ind_Rx);                   % actual number of snaps
     r=r(t_ind_logic);                   % picking 'N' poisson points
 end
-
+[ind_Rx_sort,I]=sort(ind_Rx);
 
 %% *** Generating Transmit, ADC Noise and Receive Intensities ***
 
@@ -189,7 +190,8 @@ end
 It_dB= It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
 
 Ir_dB= It_dB - 20*log10(r) - alpha*(r/1000);
-Pr= 10.^(Ir_dB/20);
+Pr= 10.^(Ir_dB/20); % of length N
+
 
 Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
