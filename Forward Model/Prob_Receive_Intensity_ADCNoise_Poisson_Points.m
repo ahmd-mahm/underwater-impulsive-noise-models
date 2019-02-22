@@ -200,7 +200,8 @@ silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),snap_waveforms));      % select 's
 
 
 if SR
-    It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
+    %It_dB_sr= It_mean_dB+(randn(1,N_sr))*sqrt(It_var_dB); % log-normal distribution of intensity
+    It_dB_sr= It_dB; % sames as It_dB
     
     Ir_dB_sr= It_dB_sr - 20*log10(r_sr) - alpha*(r_sr/1000);
     Pr_sr= 10.^(Ir_dB_sr/20);
