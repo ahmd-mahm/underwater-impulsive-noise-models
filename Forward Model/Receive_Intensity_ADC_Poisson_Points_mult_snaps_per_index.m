@@ -164,8 +164,8 @@ if SR
     ind_Rx=round(t_ind_Rx*fs);        % resolving time indices to nearest 1/fs;
     ind_Rx_sr=round(t_ind_Rx_sr*fs);  % resolving time indices to nearest 1/fs;
     
-    N_da=length(ind_Rx);                   % actual number of DA snaps
-    N_sr=length(ind_Rx_sr);                   % actual number of SR snaps
+    N=length(ind_Rx);                   % actual number of DA snaps
+    N_sr=length(ind_Rx_sr);                   % actual number of DA snaps
     r=r(t_ind_logic);                   % picking DA poisson points
     r_sr=r_sr(t_ind_sr_logic);          % picking SR poisson points
     
@@ -180,10 +180,17 @@ else
     
     ind_Rx=round(t_ind_Rx*fs);        % resolving time indices to nearest 1/fs;
     
-    N_da=length(ind_Rx);                   % actual number of snaps
+    N=length(ind_Rx);                   % actual number of snaps
     r=r(t_ind_logic);                   % picking 'N' poisson points
 
     snaps_ind_Rx=histcounts(ind_Rx,(0:samples)-0.5);
+    % ZZ=histcounts(snaps_ind_Rx,(0:max(snaps_ind_Rx)+1)-0.5); % outputs distribution of received snaps/time index
+    K=max(snaps_ind_Rx);
+    
+    snap_ind_mtx=repmat(snaps_ind_Rx,K-1,1)-(0:K-1).'; % a K x samples matrix
+    snap_ind_mtx(snap_ind_mtx>0)=1;
+    snap_ind_mtx(snap_ind_mtx<=0)=0;
+    snap_ind_mtx_logic=logical(snap_ind_mtx);
 end
 
 %% *** Generating Transmit, ADC Noise and Receive Intensities ***
@@ -191,7 +198,7 @@ end
 % in dB : Ir_dB = It_dB - 20*log10(r) - alpha*(r/1000). => alpha is in dB/km
 % linear: Ir = It * (r^-2) * 10^(- alpha*r/(1000*10))
 
-It_dB= It_mean_dB+(randn(1,N_da))*sqrt(It_var_dB); % log-normal distribution of intensity
+It_dB= It_mean_dB+(randn(1,N))*sqrt(It_var_dB); % log-normal distribution of intensity
 
 Ir_dB= It_dB - 20*log10(r) - alpha*(r/1000);
 Pr= 10.^(Ir_dB/20); % of length N
@@ -199,8 +206,6 @@ Pr= 10.^(Ir_dB/20); % of length N
 
 Pr_ts= zeros(1,samples);
 Pr_ts(ind_Rx+1)= Pr;
-%Pr_ts= Pr(ind_Rx+1);
-
 load('silhouette.mat','silh','silh_mtx');   % Silhouette of an average snap (DA)
 silh_mtx=silh_mtx(:,randperm(size(silh_mtx,2),snap_waveforms));      % select 'snap_waveforms' random snaps to ease compuatation
 

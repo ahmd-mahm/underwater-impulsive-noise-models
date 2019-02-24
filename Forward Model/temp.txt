@@ -1,0 +1,14 @@
+In our case, N>samples
+
+Pr -> N
+Pr_ts -> samples
+ind_Rx : discretized indices -> N
+
+500 waveforms, of length 182 samples
+
+Assign waveform number to each Pr or ind_Rx
+
+Evaluate the snap count observed at each index (snap_ind_Rx), select randomly the same amount of snaps, weigh them by their corresponding Pr and add.
+
+Divide ind_Rx into K vectors, each of length samples, where K=max(snap_ind_Rx). This is done by recursively popping repetitive indices from snap_ind_Rx 
+
