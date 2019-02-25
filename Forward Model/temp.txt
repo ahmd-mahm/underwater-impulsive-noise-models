@@ -10,5 +10,11 @@ Assign waveform number to each Pr or ind_Rx
 
 Evaluate the snap count observed at each index (snap_ind_Rx), select randomly the same amount of snaps, weigh them by their corresponding Pr and add.
 
-Divide ind_Rx into K vectors, each of length samples, where K=max(snap_ind_Rx). This is done by recursively popping repetitive indices from snap_ind_Rx 
+Divide ind_Rx into K vectors, each of length samples, where K=max(snap_ind_Rx). This is done by recursively popping repetitive indices from snap_ind_Rx.
 
+Pr_ts(i)=Pr(ind_Rx+1==i)
+
+
+snap number can be deduced from t_ind_Tx, which in turn gives t_ind_Rx and t_ind_Rx_sr.
+
+make the K x samples matrix from the N*T/(T-tau_min+tau_max)

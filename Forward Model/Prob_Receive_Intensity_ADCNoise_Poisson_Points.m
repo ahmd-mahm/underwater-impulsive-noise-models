@@ -169,8 +169,8 @@ if SR
     r=r(t_ind_logic);                   % picking DA poisson points
     r_sr=r_sr(t_ind_sr_logic);          % picking SR poisson points
     
-    snaps_ind_Rx=histcounts(ind_Rx,(0:samples)-0.5);
-    snaps_ind_Rx_sr=histcounts(ind_Rx_sr,(0:samples)-0.5);
+    %snaps_ind_Rx=histcounts(ind_Rx,(0:samples)-0.5);
+    %snaps_ind_Rx_sr=histcounts(ind_Rx_sr,(0:samples)-0.5);
 else
     t_ind_Rx= r/c+t_ind_Tx;
     
@@ -183,7 +183,7 @@ else
     N_da=length(ind_Rx);                   % actual number of snaps
     r=r(t_ind_logic);                   % picking 'N' poisson points
 
-    snaps_ind_Rx=histcounts(ind_Rx,(0:samples)-0.5);
+    %snaps_ind_Rx=histcounts(ind_Rx,(0:samples)-0.5);
 end
 
 %% *** Generating Transmit, ADC Noise and Receive Intensities ***
